@@ -1,25 +1,16 @@
-const WebSocketClient = require('websocket').client;
+var WebSocket = require('faye-websocket');
+var client = new WebSocket.Client('ws://localhost:3000/');
 
-var client = new WebSocketClient();
-
-client.on('connectFailed', function(error) {
-    console.log('Connect Error: ' + error.toString());
+client.on('open', function(message) {
+  console.log('Connection established!');
 });
 
-client.on('connect', function(connection) {
-    console.log('Connection established!');
-    
-    connection.on('error', function(error) {
-        console.log("Connection error: " + error.toString());
-    });
-    
-    connection.on('close', function() {
-        console.log('Connection closed!');
-    });
-    
-    connection.on('message', function(message) {
-        console.log("Current time on server is: '" + message.utf8Data + "'");
-    });
+client.on('message', function(message) {
+  console.log("Current time on server is: '" + message.data + "'");
 });
 
-client.connect('ws://localhost:3000/', 'server time');
+client.on('close', function(message) {
+  console.log('Connection closed!', message.code, message.reason);
+  
+  client = null;
+});
